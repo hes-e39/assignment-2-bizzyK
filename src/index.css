@@ -65,12 +65,11 @@ body {
 .timer-container {
     max-width: 600px; /* Limit the width of the card */
     margin: 0 auto;
-    border: 1px solid var(--panel-border);
+    border: 0px solid var(--panel-border);
     border-radius: 8px;
     padding: 20px;
     text-align: center;
     background-color: var(--panel-background);
-    box-shadow: var(--box-shadow);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -135,6 +134,18 @@ button:not(:disabled):hover {
     background-color: var(--button-hover);
 }
 
+.workout-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.workout-controls {
+    display: flex;
+    gap: 10px;
+}
+
 .spinner {
     border: 2px solid var(--text-color);
     border-top: 2px solid var(--primary-color);
@@ -157,6 +168,29 @@ button:not(:disabled):hover {
     text-align: center;
     font-size: 2rem;
     margin-bottom: 20px;
+}
+
+.remove-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 16px; /* Space between the timer and button */
+}
+
+.timer-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures even spacing between elements */
+    align-items: center;
+    width: 300px; /* Consistent width */
+    height: 250px; /* Consistent height */
+    padding: 20px;
+    margin: 10px; /* Adds spacing between cards */
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    background-color: var(--panel-background);
+    box-shadow: var(--box-shadow);
+    text-align: center;
 }
 
 .error-message {

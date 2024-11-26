@@ -1,12 +1,15 @@
-import {useState, useEffect} from "react";
+// UseTimer.ts
+
+import { useCallback, useEffect, useState } from 'react';
 
 interface UseTimerParams {
-    type: "stopwatch" | "countdown" | "xy" | "tabata";
+    type: 'stopwatch' | 'countdown' | 'xy' | 'tabata';
     startTime?: number;
     workTime?: number;
     restTime?: number;
     roundTime?: number;
     rounds?: number;
+    duration?: number;
 }
 
 interface UseTimerReturn {
@@ -21,60 +24,58 @@ interface UseTimerReturn {
     fastForward: () => void;
 }
 
-const useTimer = ({
-                      type,
-                      startTime = 0,
-                      workTime = 20,
-                      restTime = 10,
-                      roundTime = 60,
-                      rounds = 1,
-                  }: UseTimerParams): UseTimerReturn => {
-    const [time, setTime] = useState(type === "countdown" ? startTime : 0);
+const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime = 60, rounds = 1, duration = 10 }: UseTimerParams): UseTimerReturn => {
+    const [time, setTime] = useState(type === 'countdown' ? startTime : 0);
     const [isActive, setIsActive] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
-    const [isWorkInterval, setIsWorkInterval] = useState(true); // Tabata-specific
+    const [isWorkInterval, setIsWorkInterval] = useState(true);
     const [currentRound, setCurrentRound] = useState(1);
 
-    useEffect(() => {
-        let timer: NodeJS.Timeout | null = null;
-
-        if (isActive && !isPaused) {
-            timer = setInterval(() => {
-                setTime((prevTime) => (type === "stopwatch" ? prevTime + 1 : prevTime - 1));
-            }, 1000);
-        }
-
-        if (time === 0 && isActive) {
-            handleEndOfInterval();
-        }
-
-        return () => clearInterval(timer!);
-    }, [time, isActive, isPaused]);
-
-    const handleEndOfInterval = () => {
-        if (type === "countdown") {
-            setIsActive(false);
-        } else if (type === "xy") {
+    const handleEndOfInterval = useCallback(() => {
+        if (type === 'xy') {
             if (currentRound < rounds) {
-                setCurrentRound((prev) => prev + 1);
+                setCurrentRound(prev => prev + 1);
                 setTime(roundTime);
             } else {
                 setIsActive(false);
-                setTime(0);
             }
-        } else if (type === "tabata") {
+        } else if (type === 'tabata') {
             if (currentRound === rounds && !isWorkInterval) {
                 setIsActive(false);
             } else if (isWorkInterval) {
-                setTime(restTime);
                 setIsWorkInterval(false);
+                setTime(restTime);
             } else {
-                setTime(workTime);
                 setIsWorkInterval(true);
-                setCurrentRound((prev) => prev + 1);
+                setCurrentRound(prev => (prev < rounds ? prev + 1 : prev));
+                setTime(workTime);
             }
+        } else {
+            setIsActive(false);
         }
-    };
+    }, [type, currentRound, rounds, roundTime, restTime, workTime, isWorkInterval]);
+
+    useEffect(() => {
+        if (!isActive || isPaused) return;
+
+        const timer = setInterval(() => {
+            setTime(prevTime => {
+                if (type === 'stopwatch' && prevTime + 1 >= duration) {
+                    setIsActive(false);
+                    clearInterval(timer);
+                    return duration;
+                }
+                if (prevTime - 1 <= 0 && type !== 'stopwatch') {
+                    clearInterval(timer);
+                    handleEndOfInterval(); // Trigger transition
+                    return 0;
+                }
+                return type === 'stopwatch' ? prevTime + 1 : prevTime - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [isActive, isPaused, type, duration, handleEndOfInterval]);
 
     return {
         time,
@@ -82,19 +83,23 @@ const useTimer = ({
         isPaused,
         isWorkInterval,
         currentRound,
-        start: () => setIsActive(true),
-        pause: () => setIsPaused((prev) => !prev),
-        reset: () => {
+        start: useCallback(() => {
+            setIsActive(true);
+            setIsPaused(false);
+        }, []),
+        pause: useCallback(() => setIsPaused(prev => !prev), []),
+        reset: useCallback(() => {
             setIsActive(false);
             setIsPaused(false);
             setCurrentRound(1);
-            setTime(type === "countdown" ? startTime : roundTime);
-        },
-        fastForward: () => {
-            setCurrentRound(rounds);
-            setTime(0);
-            setIsActive(false);
-        },
+            setIsWorkInterval(true);
+            setTime(type === 'countdown' ? startTime : 0);
+        }, [type, startTime]),
+
+        fastForward: useCallback(() => {
+            setTime(0); // End the current timer
+            setIsActive(false); // Stop the timer
+        }, []),
     };
 };
 

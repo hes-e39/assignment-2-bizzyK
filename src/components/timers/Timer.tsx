@@ -1,21 +1,42 @@
 // Timer.tsx
-import type React from 'react';
+
+import React from 'react';
 import useTimer from '../../hooks/UseTimer';
-import Button from '../button/Button';
 import DisplayRounds from '../displayRounds/DisplayRounds';
 import DisplayTime from '../displayTime/DisplayTime';
 
 interface TimerProps {
+    id: string;
+    name: string;
     type: 'stopwatch' | 'countdown' | 'xy' | 'tabata';
     startTime?: number;
     workTime?: number;
     restTime?: number;
     roundTime?: number;
     rounds?: number;
+    duration: number;
+    state: 'not running' | 'running' | 'completed' | 'paused';
+    addedAt: number;
+    isActive: boolean;
 }
 
-const Timer: React.FC<TimerProps> = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime = 60, rounds = 1 }) => {
-    const { time, isActive, isPaused, isWorkInterval, currentRound, start, pause, reset, fastForward } = useTimer({ type, startTime, workTime, restTime, roundTime, rounds });
+const Timer: React.FC<TimerProps> = ({ name, type, startTime = 0, workTime = 20, restTime = 10, roundTime = 60, rounds = 1, isActive }) => {
+    const { time, isPaused, isWorkInterval, currentRound, start, pause } = useTimer({
+        type,
+        startTime,
+        workTime,
+        restTime,
+        roundTime,
+        rounds,
+    });
+
+    React.useEffect(() => {
+        if (isActive && !isPaused) {
+            start();
+        } else {
+            pause();
+        }
+    }, [isActive, isPaused, start, pause]);
 
     const title = {
         stopwatch: 'Stopwatch',
@@ -30,16 +51,11 @@ const Timer: React.FC<TimerProps> = ({ type, startTime = 0, workTime = 20, restT
 
     return (
         <div className="timer-container">
-            <h2>{title}</h2>
+            <h2>{name}</h2>
+            <h3>{title}</h3>
             {type === 'tabata' || type === 'xy' ? <DisplayRounds currentRound={currentRound} totalRounds={rounds} /> : null}
             {type === 'tabata' && <div className={`interval-display ${isWorkInterval ? 'work' : 'rest'}`}>{isWorkInterval ? 'Work' : 'Rest'} Interval</div>}
             <DisplayTime timeInSeconds={time} />
-            <div className="controls">
-                <Button onClick={start} label="Start" disabled={isActive && !isPaused} />
-                <Button onClick={pause} label={isPaused ? 'Resume' : 'Pause'} disabled={!isActive} />
-                <Button onClick={reset} label="Reset" />
-                <Button onClick={fastForward} label="Fast Forward" />
-            </div>
         </div>
     );
 };

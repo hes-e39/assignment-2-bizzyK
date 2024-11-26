@@ -65,7 +65,11 @@ const TimersView = () => {
                 <div className="timers-container">
                     {timers.map((timer, index) => (
                         <div key={timer.id} className="timer-wrapper">
-                            <TimerComponent {...timer} isActive={index === activeTimerIndex} />
+                            <TimerComponent
+                                {...timer}
+                                isActive={index === activeTimerIndex}
+                                state={timer.state} // Ensure `state` is passed here
+                            />
                             <Button type="danger" label="Remove" onClick={() => dispatch({ type: 'REMOVE_TIMER', payload: timer.id })} />
                         </div>
                     ))}

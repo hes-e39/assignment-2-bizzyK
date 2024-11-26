@@ -20,7 +20,18 @@ interface TimerProps {
     isActive: boolean;
 }
 
-const Timer: React.FC<TimerProps> = ({ name, type, startTime = 0, workTime = 20, restTime = 10, roundTime = 60, rounds = 1, isActive }) => {
+const Timer: React.FC<TimerProps> = ({
+    name,
+    type,
+    startTime = 0,
+    workTime = 20,
+    restTime = 10,
+    roundTime = 60,
+    rounds = 1,
+    duration,
+    state, // Fixed: Using the state prop
+    isActive,
+}) => {
     const { time, isWorkInterval, currentRound, start, pause } = useTimer({
         type,
         startTime,
@@ -28,15 +39,16 @@ const Timer: React.FC<TimerProps> = ({ name, type, startTime = 0, workTime = 20,
         restTime,
         roundTime,
         rounds,
+        duration,
     });
 
     React.useEffect(() => {
-        if (isActive) {
-            start(); // Start the timer only if `isActive` is true
-        } else if (isActive === false) {
-            pause(); // Pause the timer if `isActive` is explicitly false
+        if (isActive && state === 'not running') {
+            start(); // Start the timer only if `isActive` is true and it's not running yet
+        } else if (!isActive && state === 'running') {
+            pause(); // Pause the timer only if `isActive` is false and it's running
         }
-    }, [isActive, start, pause]);
+    }, [isActive, state, start, pause]);
 
     const title = {
         stopwatch: 'Stopwatch',

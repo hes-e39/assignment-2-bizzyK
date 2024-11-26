@@ -21,7 +21,7 @@ interface TimerProps {
 }
 
 const Timer: React.FC<TimerProps> = ({ name, type, startTime = 0, workTime = 20, restTime = 10, roundTime = 60, rounds = 1, isActive }) => {
-    const { time, isPaused, isWorkInterval, currentRound, start, pause } = useTimer({
+    const { time, isWorkInterval, currentRound, start, pause } = useTimer({
         type,
         startTime,
         workTime,
@@ -31,12 +31,12 @@ const Timer: React.FC<TimerProps> = ({ name, type, startTime = 0, workTime = 20,
     });
 
     React.useEffect(() => {
-        if (isActive && !isPaused) {
+        if (isActive) {
             start();
         } else {
             pause();
         }
-    }, [isActive, isPaused, start, pause]);
+    }, [isActive, start, pause]);
 
     const title = {
         stopwatch: 'Stopwatch',
@@ -53,7 +53,7 @@ const Timer: React.FC<TimerProps> = ({ name, type, startTime = 0, workTime = 20,
         <div className="timer-container">
             <h2>{name}</h2>
             <h3>{title}</h3>
-            {type === 'tabata' || type === 'xy' ? <DisplayRounds currentRound={currentRound} totalRounds={rounds} /> : null}
+            {(type === 'tabata' || type === 'xy') && <DisplayRounds currentRound={currentRound} totalRounds={rounds} />}
             {type === 'tabata' && <div className={`interval-display ${isWorkInterval ? 'work' : 'rest'}`}>{isWorkInterval ? 'Work' : 'Rest'} Interval</div>}
             <DisplayTime timeInSeconds={time} />
         </div>

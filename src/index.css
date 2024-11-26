@@ -91,10 +91,12 @@ body {
 button {
     flex: 1; /* Ensures all buttons take equal width */
     max-width: 100px;
+    max-height: 40px;
+    min-height: 40px;
     min-width: 100px;
     background-color: var(--primary-color);
     color: var(--text-color);
-    padding: 10px 20px;
+    padding: 5px 5px;
     margin: 5px 5px 5px 0; /* Adds spacing between buttons */
     border: none;
     border-radius: 4px;
@@ -183,7 +185,7 @@ button:not(:disabled):hover {
     justify-content: space-between; /* Ensures even spacing between elements */
     align-items: center;
     width: 300px; /* Consistent width */
-    height: 250px; /* Consistent height */
+    height: 370px; /* Consistent height */
     padding: 20px;
     margin: 10px; /* Adds spacing between cards */
     border: 1px solid var(--panel-border);

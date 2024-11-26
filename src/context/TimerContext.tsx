@@ -3,7 +3,7 @@
 import React, { createContext, useReducer, useContext } from 'react';
 import type { TimerType } from '../views/AddTimer';
 
-type Timer = {
+export type Timer = {
     id: string;
     type: TimerType;
     duration: number;
@@ -19,7 +19,7 @@ type Timer = {
 type TimerState = {
     timers: Timer[];
     activeTimerIndex: number | null;
-    queueMode: 'sequential' | 'parallel' | 'shuffle';
+    queueMode: 'sequential';
 };
 
 type TimerAction =
@@ -42,8 +42,14 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         case 'ADD_TIMER':
             return { ...state, timers: [...state.timers, action.payload] };
 
-        case 'REMOVE_TIMER':
-            return { ...state, timers: state.timers.filter(timer => timer.id !== action.payload) };
+        case 'REMOVE_TIMER': {
+            const updatedTimers = state.timers.filter(timer => timer.id !== action.payload);
+            return {
+                ...state,
+                timers: updatedTimers,
+                activeTimerIndex: updatedTimers.length === 0 ? null : state.activeTimerIndex,
+            };
+        }
 
         case 'RESET_TIMERS':
             return initialState;
@@ -53,10 +59,11 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
 
         case 'COMPLETE_TIMER': {
             const nextIndex = state.activeTimerIndex !== null && state.activeTimerIndex + 1 < state.timers.length ? state.activeTimerIndex + 1 : null;
+
             return {
                 ...state,
                 timers: state.timers.map((timer, index) => (index === state.activeTimerIndex ? { ...timer, state: 'completed' } : timer)),
-                activeTimerIndex: nextIndex, // Transition to the next timer
+                activeTimerIndex: nextIndex,
             };
         }
 
@@ -87,12 +94,10 @@ export const TimerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return <TimerContext.Provider value={{ state, dispatch }}>{children}</TimerContext.Provider>;
 };
 
-export const useTimerContext = <T extends Partial<TimerState>>(selector?: (state: TimerState) => T): T & { dispatch: React.Dispatch<TimerAction> } => {
+export const useTimerContext = (): { state: TimerState; dispatch: React.Dispatch<TimerAction> } => {
     const context = useContext(TimerContext);
     if (!context) {
         throw new Error('useTimerContext must be used within a TimerProvider');
     }
-
-    const selectedState = selector ? selector(context.state) : (context.state as T);
-    return { ...selectedState, dispatch: context.dispatch };
+    return context;
 };

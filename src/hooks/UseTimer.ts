@@ -1,6 +1,7 @@
 // UseTimer.ts
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTimerContext } from '../context/TimerContext';
 
 interface UseTimerParams {
     type: 'stopwatch' | 'countdown' | 'xy' | 'tabata';
@@ -31,17 +32,24 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
     const [isWorkInterval, setIsWorkInterval] = useState(true);
     const [currentRound, setCurrentRound] = useState(1);
 
+    const { state, dispatch } = useTimerContext();
+    const { activeTimerIndex } = state;
+
     const handleEndOfInterval = useCallback(() => {
+        if (activeTimerIndex === null) return;
+
         if (type === 'xy') {
             if (currentRound < rounds) {
                 setCurrentRound(prev => prev + 1);
                 setTime(roundTime);
             } else {
                 setIsActive(false);
+                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
             }
         } else if (type === 'tabata') {
             if (currentRound === rounds && !isWorkInterval) {
                 setIsActive(false);
+                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
             } else if (isWorkInterval) {
                 setIsWorkInterval(false);
                 setTime(restTime);
@@ -52,8 +60,9 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
             }
         } else {
             setIsActive(false);
+            dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
         }
-    }, [type, currentRound, rounds, roundTime, restTime, workTime, isWorkInterval]);
+    }, [type, currentRound, rounds, roundTime, restTime, workTime, isWorkInterval, dispatch, activeTimerIndex]);
 
     useEffect(() => {
         if (!isActive || isPaused) return;
@@ -63,11 +72,14 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
                 if (type === 'stopwatch' && prevTime + 1 >= duration) {
                     setIsActive(false);
                     clearInterval(timer);
+                    if (activeTimerIndex !== null) {
+                        dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                    }
                     return duration;
                 }
                 if (prevTime - 1 <= 0 && type !== 'stopwatch') {
                     clearInterval(timer);
-                    handleEndOfInterval(); // Trigger transition
+                    handleEndOfInterval();
                     return 0;
                 }
                 return type === 'stopwatch' ? prevTime + 1 : prevTime - 1;
@@ -75,7 +87,7 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [isActive, isPaused, type, duration, handleEndOfInterval]);
+    }, [isActive, isPaused, type, duration, handleEndOfInterval, dispatch, activeTimerIndex]);
 
     return {
         time,
@@ -95,11 +107,13 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
             setIsWorkInterval(true);
             setTime(type === 'countdown' ? startTime : 0);
         }, [type, startTime]),
-
         fastForward: useCallback(() => {
-            setTime(0); // End the current timer
-            setIsActive(false); // Stop the timer
-        }, []),
+            setTime(0);
+            setIsActive(false);
+            if (dispatch && activeTimerIndex !== null) {
+                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+            }
+        }, [dispatch, activeTimerIndex]),
     };
 };
 

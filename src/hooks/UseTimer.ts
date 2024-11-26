@@ -44,12 +44,16 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
                 setTime(roundTime);
             } else {
                 setIsActive(false);
-                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                setTimeout(() => {
+                    dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                }, 0); // Defer state update
             }
         } else if (type === 'tabata') {
             if (currentRound === rounds && !isWorkInterval) {
                 setIsActive(false);
-                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                setTimeout(() => {
+                    dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                }, 0); // Defer state update
             } else if (isWorkInterval) {
                 setIsWorkInterval(false);
                 setTime(restTime);
@@ -60,7 +64,9 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
             }
         } else {
             setIsActive(false);
-            dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+            setTimeout(() => {
+                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+            }, 0); // Defer state update
         }
     }, [type, currentRound, rounds, roundTime, restTime, workTime, isWorkInterval, dispatch, activeTimerIndex]);
 
@@ -73,13 +79,15 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
                     clearInterval(timer);
                     setIsActive(false);
                     if (activeTimerIndex !== null) {
-                        dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                        setTimeout(() => {
+                            dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                        }, 0); // Defer state update
                     }
                     return duration;
                 }
                 if (prevTime - 1 <= 0 && type !== 'stopwatch') {
                     clearInterval(timer);
-                    handleEndOfInterval();
+                    setTimeout(handleEndOfInterval, 0); // Defer interval handling
                     return 0;
                 }
                 return type === 'stopwatch' ? prevTime + 1 : prevTime - 1;
@@ -99,20 +107,24 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
             setIsActive(true);
             setIsPaused(false);
             if (dispatch && activeTimerIndex !== null) {
-                dispatch({
-                    type: 'UPDATE_TIMER_STATE',
-                    payload: { index: activeTimerIndex, state: 'running' },
-                });
+                setTimeout(() => {
+                    dispatch({
+                        type: 'UPDATE_TIMER_STATE',
+                        payload: { index: activeTimerIndex, state: 'running' },
+                    });
+                }, 0); // Defer dispatch
             }
         }, [dispatch, activeTimerIndex]),
         pause: useCallback(() => {
             setIsPaused(prev => !prev);
             if (dispatch && activeTimerIndex !== null) {
                 const newState = isPaused ? 'running' : 'paused';
-                dispatch({
-                    type: 'UPDATE_TIMER_STATE',
-                    payload: { index: activeTimerIndex, state: newState },
-                });
+                setTimeout(() => {
+                    dispatch({
+                        type: 'UPDATE_TIMER_STATE',
+                        payload: { index: activeTimerIndex, state: newState },
+                    });
+                }, 0); // Defer dispatch
             }
         }, [dispatch, activeTimerIndex, isPaused]),
         reset: useCallback(() => {
@@ -122,14 +134,18 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
             setIsWorkInterval(true);
             setTime(type === 'countdown' ? startTime : 0);
             if (dispatch) {
-                dispatch({ type: 'RESET_TIMER_STATE' });
+                setTimeout(() => {
+                    dispatch({ type: 'RESET_TIMER_STATE' });
+                }, 0); // Defer dispatch
             }
         }, [dispatch, type, startTime]),
         fastForward: useCallback(() => {
             setTime(0);
             setIsActive(false);
             if (dispatch && activeTimerIndex !== null) {
-                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                setTimeout(() => {
+                    dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
+                }, 0); // Defer dispatch
             }
         }, [dispatch, activeTimerIndex]),
     };

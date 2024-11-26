@@ -32,9 +32,9 @@ const Timer: React.FC<TimerProps> = ({ name, type, startTime = 0, workTime = 20,
 
     React.useEffect(() => {
         if (isActive) {
-            start();
-        } else {
-            pause();
+            start(); // Start the timer only if `isActive` is true
+        } else if (isActive === false) {
+            pause(); // Pause the timer if `isActive` is explicitly false
         }
     }, [isActive, start, pause]);
 

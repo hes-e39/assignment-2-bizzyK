@@ -70,8 +70,8 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
         const timer = setInterval(() => {
             setTime(prevTime => {
                 if (type === 'stopwatch' && prevTime + 1 >= duration) {
-                    setIsActive(false);
                     clearInterval(timer);
+                    setIsActive(false);
                     if (activeTimerIndex !== null) {
                         dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
                     }
@@ -98,15 +98,33 @@ const useTimer = ({ type, startTime = 0, workTime = 20, restTime = 10, roundTime
         start: useCallback(() => {
             setIsActive(true);
             setIsPaused(false);
-        }, []),
-        pause: useCallback(() => setIsPaused(prev => !prev), []),
+            if (dispatch && activeTimerIndex !== null) {
+                dispatch({
+                    type: 'UPDATE_TIMER_STATE',
+                    payload: { index: activeTimerIndex, state: 'running' },
+                });
+            }
+        }, [dispatch, activeTimerIndex]),
+        pause: useCallback(() => {
+            setIsPaused(prev => !prev);
+            if (dispatch && activeTimerIndex !== null) {
+                const newState = isPaused ? 'running' : 'paused';
+                dispatch({
+                    type: 'UPDATE_TIMER_STATE',
+                    payload: { index: activeTimerIndex, state: newState },
+                });
+            }
+        }, [dispatch, activeTimerIndex, isPaused]),
         reset: useCallback(() => {
             setIsActive(false);
             setIsPaused(false);
             setCurrentRound(1);
             setIsWorkInterval(true);
             setTime(type === 'countdown' ? startTime : 0);
-        }, [type, startTime]),
+            if (dispatch) {
+                dispatch({ type: 'RESET_TIMER_STATE' });
+            }
+        }, [dispatch, type, startTime]),
         fastForward: useCallback(() => {
             setTime(0);
             setIsActive(false);

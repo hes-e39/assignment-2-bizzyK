@@ -61,6 +61,7 @@ const TimersView = () => {
 
         setRemainingWorkoutTime(calculateRemainingWorkoutTime());
 
+        // Check if workout is complete
         if (timers.length > 0 && activeTimerIndex === null && remainingWorkoutTime === 0) {
             setIsWorkoutComplete(true); // Workout is complete
         } else {
@@ -80,6 +81,7 @@ const TimersView = () => {
     const handleBeginWorkout = () => {
         if (timers.length > 0) {
             dispatch({ type: 'START_TIMER', payload: 0 });
+            setIsWorkoutComplete(false); // Ensure flag is reset when starting a workout
         }
     };
 
@@ -95,8 +97,8 @@ const TimersView = () => {
 
     const handleResetWorkout = () => {
         dispatch({ type: 'RESET_TIMER_STATE' });
-        setRemainingWorkoutTime(totalWorkoutTime);
-        setIsWorkoutComplete(false); // Reset flag
+        setRemainingWorkoutTime(totalWorkoutTime); // Reset Remaining Time
+        setIsWorkoutComplete(false); // Ensure the congratulations message does not show
     };
 
     const handleFastForwardWorkout = () => {

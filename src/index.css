@@ -19,19 +19,23 @@
     --button-hover: #8f68d6;
     --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Darker shadow for dark mode */
 }
+[data-theme="light"] button {
+    color: white; /* White text for buttons in light mode */
+}
 
+/* Additional styles for responsiveness */
 @media (max-width: 600px) {
     .timers-container {
-        flex-direction: column; /* Stack timers vertically */
-        gap: 15px; /* Reduce spacing for smaller screens */
+        flex-direction: column;
+        gap: 15px;
     }
 
     button {
-        max-width: 100%; /* Make buttons full-width */
+        max-width: 100%;
     }
 
     h1 {
-        font-size: 1.5rem; /* Adjust font size for small screens */
+        font-size: 1.5rem;
     }
 }
 
@@ -51,80 +55,60 @@ body {
     margin-top: 20px;
 }
 
+.congrats-message {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--button-hover);
+    font-weight: bold;
+    margin: 0; /* Remove margin to ensure proper alignment */
+}
+
 .timers-container {
     display: flex;
-    flex-wrap: wrap; /* Allows timers to wrap onto the next line on smaller screens */
-    gap: 20px; /* Adds space between each timer */
-    justify-content: center; /* Centers the timers within the container */
-    padding: 20px; /* Adds padding around the entire group of timers */
-    max-height: 70vh; /* Adjust based on available space */
-    overflow-y: auto; /* Allow vertical scrolling */
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
     border: 1px solid var(--panel-border);
 }
 
-.timer-container {
-    max-width: 600px; /* Limit the width of the card */
-    margin: 0 auto;
-    border: 0px solid var(--panel-border);
-    border-radius: 8px;
+.timer {
+    width: 300px;
+    height: 370px;
     padding: 20px;
-    text-align: center;
+    margin: 10px;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
     background-color: var(--panel-background);
+    box-shadow: var(--box-shadow);
+    text-align: center;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
 }
 
-.timer-container,
-.button {
-    transition: background-color 0.5s ease, box-shadow 0.5s ease;
-}
-
-.controls {
-    display: flex;
-    justify-content: space-between; /* Aligns buttons in a row */
-    width: 100%; /* Ensures buttons take full width inside the container */
-    margin-top: auto; /* Pushes controls to the bottom of the container */
-    padding-top: 10px; /* Adds a little space between the timer and the buttons */
-}
-
 button {
-    flex: 1; /* Ensures all buttons take equal width */
+    flex: 1;
     max-width: 100px;
-    max-height: 40px;
+    max-height: 50px;
     min-height: 40px;
     min-width: 100px;
     background-color: var(--primary-color);
     color: var(--text-color);
-    padding: 5px 5px;
-    margin: 5px 5px 5px 0; /* Adds spacing between buttons */
+    padding: 5px;
+    margin: 5px;
     border: none;
     border-radius: 4px;
-    font-size: .75rem;
+    font-size: 0.75rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
     text-align: center;
-}
-
-.button.primary {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-}
-
-.button.secondary {
-    background-color: var(--panel-background);
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-}
-
-.button.danger {
-    background-color: red;
-    color: white;
-}
-
-button:active {
-    transform: scale(0.95); /* Shrink slightly on click */
-    transition: transform 0.1s ease; /* Smooth animation */
 }
 
 button:disabled {
@@ -146,6 +130,14 @@ button:not(:disabled):hover {
 .workout-controls {
     display: flex;
     gap: 10px;
+}
+
+.error-message {
+    color: red;
+    background-color: #ffe5e5;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
 }
 
 .spinner {

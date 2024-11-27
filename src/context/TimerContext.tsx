@@ -14,6 +14,7 @@ export type Timer = {
     roundTime?: number;
     workTime?: number;
     restTime?: number;
+    currentRound?: number;
 };
 
 type TimerState = {
@@ -29,7 +30,7 @@ type TimerAction =
     | { type: 'START_TIMER'; payload: number }
     | { type: 'COMPLETE_TIMER'; payload: number }
     | { type: 'RESET_TIMER_STATE' }
-    | { type: 'UPDATE_TIMER_STATE'; payload: { index: number; state: 'running' | 'paused' } };
+    | { type: 'UPDATE_TIMER_STATE'; payload: { index: number; state: 'running' | 'paused' | 'completed'; currentRound?: number } };
 
 const initialState: TimerState = {
     timers: [],
@@ -58,20 +59,50 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
             return { ...state, activeTimerIndex: action.payload };
 
         case 'COMPLETE_TIMER': {
-            const nextIndex = state.activeTimerIndex !== null && state.activeTimerIndex + 1 < state.timers.length ? state.activeTimerIndex + 1 : null;
+            const nextIndex =
+                state.activeTimerIndex !== null &&
+                state.activeTimerIndex + 1 < state.timers.length
+                    ? state.activeTimerIndex + 1
+                    : null;
 
             return {
                 ...state,
-                timers: state.timers.map((timer, index) => (index === state.activeTimerIndex ? { ...timer, state: 'completed' } : timer)),
-                activeTimerIndex: nextIndex,
+                timers: state.timers.map((timer, index) =>
+                    index === state.activeTimerIndex
+                        ? {
+                            ...timer,
+                            state: 'completed',
+                            duration: 0,
+                            currentRound: timer.rounds || 1, // Mark all rounds completed
+                        }
+                        : timer
+                ),
+                activeTimerIndex: nextIndex, // Move to the next timer or null if workout ends
             };
         }
 
         case 'RESET_TIMER_STATE':
             return {
                 ...state,
-                timers: state.timers.map(timer => ({ ...timer, state: 'not running' })),
-                activeTimerIndex: null,
+                timers: state.timers.map(timer => {
+                    let resetTime = 0;
+
+                    if (timer.type === 'xy') {
+                        resetTime = timer.roundTime || 0; // Reset to the first round's time
+                    } else if (timer.type === 'tabata') {
+                        resetTime = timer.workTime || 0; // Reset to the first work interval
+                    } else if (timer.type === 'countdown') {
+                        resetTime = timer.duration || 0; // Reset to the original countdown duration
+                    }
+
+                    return {
+                        ...timer,
+                        state: 'not running', // Reset timer state
+                        currentRound: timer.type === 'xy' || timer.type === 'tabata' ? 1 : undefined, // Reset rounds for applicable timers
+                        duration: timer.type === 'stopwatch' || timer.type === 'countdown' ? resetTime : timer.duration, // Reset only for stopwatch and countdown
+                    };
+                }),
+                activeTimerIndex: null, // Reset active timer index
             };
 
         case 'UPDATE_TIMER_STATE': {

@@ -50,6 +50,7 @@ const AddTimer = () => {
             name: name.trim() || timerType,
             state: 'not running' as 'not running',
             addedAt: Date.now(), // Timestamp for sorting
+            currentRound: 1, // Initialize currentRound
         };
 
         dispatch({ type: 'ADD_TIMER', payload: newTimer });
@@ -80,7 +81,7 @@ const AddTimer = () => {
     };
 
     return (
-        <div className="timer-container">
+        <div className="timers-container">
             <h2>Add Timer</h2>
             {error && <p className="error-message">{error}</p>}
             <form

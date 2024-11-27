@@ -21,17 +21,17 @@ interface TimerProps {
 }
 
 const Timer: React.FC<TimerProps> = ({
-    name,
-    type,
-    startTime = 0,
-    workTime = 20,
-    restTime = 10,
-    roundTime = 60,
-    rounds = 1,
-    duration,
-    state, // Fixed: Using the state prop
-    isActive,
-}) => {
+                                         name,
+                                         type,
+                                         startTime = 0,
+                                         workTime = 20,
+                                         restTime = 10,
+                                         roundTime = 60,
+                                         rounds = 1,
+                                         duration,
+                                         state, // Fixed: Using the state prop
+                                         isActive,
+                                     }) => {
     const { time, isWorkInterval, currentRound, start, pause } = useTimer({
         type,
         startTime,

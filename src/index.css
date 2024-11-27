@@ -4,6 +4,7 @@
     --primary-color: #007bff;
     --panel-background: #f9f9f9;
     --panel-border: #e0e0e0;
+    --button-text: #ffffff;
     --button-disabled-bg: #cccccc;
     --button-hover: #0056b3;
     --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -15,12 +16,10 @@
     --primary-color: #bb86fc;
     --panel-background: #1e1e1e;
     --panel-border: #333333;
+    --button-text: #ffffff;
     --button-disabled-bg: #555555;
     --button-hover: #8f68d6;
     --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Darker shadow for dark mode */
-}
-[data-theme="light"] button {
-    color: white; /* White text for buttons in light mode */
 }
 
 /* Additional styles for responsiveness */
@@ -46,69 +45,82 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.5s ease, color 0.5s ease;
-}
-
-.center-text {
-    text-align: center;
-    font-size: 1.2rem;
-    color: var(--text-color);
-    margin-top: 20px;
-}
-
-.congrats-message {
     display: flex;
-    justify-content: center; /* Centers horizontally */
-    align-items: center; /* Centers vertically */
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.timer-message{
+    display: flex;
     text-align: center;
     font-size: 1.5rem;
-    color: var(--button-hover);
+    color: var(--primary-color);
     font-weight: bold;
-    margin: 0; /* Remove margin to ensure proper alignment */
+    margin-top: 50px; /* Remove margin to ensure proper alignment */
 }
 
 .timers-container {
     display: flex;
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: center;
+    width: 85vw;
     padding: 20px;
-    max-height: 70vh;
+    min-height: 60vh;
     overflow-y: auto;
-    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+
 }
 
-.timer {
-    width: 300px;
-    height: 370px;
+.timer-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures even spacing between elements */
+    align-items: center;
+    width: 300px; /* Consistent width */
+    height: 300px;
+    overflow: scroll;
     padding: 20px;
-    margin: 10px;
+    margin: 10px; /* Adds spacing between cards */
     border: 1px solid var(--panel-border);
     border-radius: 8px;
     background-color: var(--panel-background);
     box-shadow: var(--box-shadow);
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
 }
 
-button {
-    flex: 1;
-    max-width: 100px;
-    max-height: 50px;
-    min-height: 40px;
-    min-width: 100px;
-    background-color: var(--primary-color);
+.add-timer-page .timer-wrapper {
+    height: auto;
+}
+.timer-wrapper h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
     color: var(--text-color);
-    padding: 5px;
+}
+
+/* Buttons */
+button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--primary-color);
+    color: var(--button-text);
+    padding: 10px 20px;
     margin: 5px;
     border: none;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
     text-align: center;
+}
+
+.button-icon {
+    font-size: 1.2rem;
 }
 
 button:disabled {
@@ -120,32 +132,83 @@ button:not(:disabled):hover {
     background-color: var(--button-hover);
 }
 
+/* Header for workout section */
 .workout-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    text-align: center;
     margin-bottom: 20px;
 }
 
-.workout-controls {
-    display: flex;
-    gap: 10px;
+.workout-header p {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
 }
 
+/* Controls for workout buttons */
+.workout-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px; /* Add space above buttons */
+}
+
+/* Form styling */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+    width: 100%; /* Full width inside the card */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+.input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid var(--panel-border);
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Error message */
 .error-message {
     color: red;
     background-color: #ffe5e5;
     padding: 10px;
     border-radius: 4px;
     margin-bottom: 20px;
+    font-size: 0.9rem;
 }
 
+/* Miscellaneous */
 .spinner {
     border: 2px solid var(--text-color);
     border-top: 2px solid var(--primary-color);
     border-radius: 50%;
-    width: 12px;
-    height: 12px;
+    width: 1rem;
+    height: 1rem;
     animation: spin 1s linear infinite;
 }
 
@@ -158,43 +221,26 @@ button:not(:disabled):hover {
     }
 }
 
-.view-header {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 20px;
+/* Documentation and links */
+li a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1.2rem;
 }
 
-.remove-button-container {
+li a:hover {
+    color: var(--button-hover);
+}
+
+ul {
+    list-style: none;
+    padding: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
-    margin-top: 16px; /* Space between the timer and button */
+    gap: 20px;
 }
 
-.timer-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Ensures even spacing between elements */
-    align-items: center;
-    width: 300px; /* Consistent width */
-    height: 370px; /* Consistent height */
-    padding: 20px;
-    margin: 10px; /* Adds spacing between cards */
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    background-color: var(--panel-background);
-    box-shadow: var(--box-shadow);
-    text-align: center;
-}
-
-.error-message {
-    color: red;
-    background-color: #ffe5e5;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-
+/* Theme toggle styles */
 .theme-toggle-container:hover {
     color: var(--primary-color);
 }
@@ -207,6 +253,7 @@ button:not(:disabled):hover {
     color: var(--text-color);
     cursor: pointer;
     transition: color 0.3s ease;
+    margin-top: 20px;
     user-select: none; /* Prevent text selection on click */
 }
 
@@ -308,15 +355,31 @@ th {
 }
 
 .documentation-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 85vw;
     padding: 20px;
-    margin: auto;
-    max-width: 800px;
+    min-height: 60vh;
+    overflow-y: auto;
+    border-radius: 8px;
 }
 
+
 .documentation-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    margin-bottom: 40px;
-    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.documentation-header p {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
 }
 
 .component-section {

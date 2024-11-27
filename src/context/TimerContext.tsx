@@ -1,7 +1,15 @@
 //TimerContext.tsx
 
-import { createContext, useReducer, useContext } from 'react';
+import  { createContext, useReducer, useContext } from 'react';
+import type React from "react";
 import type { TimerType } from '../views/AddTimer';
+
+export enum TimerStatus{
+    READY = 'READY',
+    RUNNING = 'RUNNING',
+    PAUSED = 'PAUSED',
+    COMPLETE = 'COMPLETE',
+}
 
 export type Timer = {
     id: string;
@@ -19,52 +27,69 @@ export type Timer = {
 
 type TimerState = {
     timers: Timer[];
+    timerStatus: TimerStatus,
     activeTimerIndex: number | null;
     queueMode: 'sequential';
+    globalTimer: number
 };
 
 type TimerAction =
     | { type: 'ADD_TIMER'; payload: Timer }
-    | { type: 'REMOVE_TIMER'; payload: string }
-    | { type: 'RESET_TIMERS' }
+    | { type: 'REMOVE_TIMER'; payload: number }
     | { type: 'START_TIMER'; payload: number }
-    | { type: 'COMPLETE_TIMER'; payload: number }
+    | { type: 'TOGGLE_TIMER'; payload: TimerStatus }
+    | { type: 'COMPLETE_CURRENT_TIMER'; payload: number }
     | { type: 'RESET_TIMER_STATE' }
-    | { type: 'UPDATE_TIMER_STATE'; payload: { index: number; state: 'running' | 'paused' | 'completed'; currentRound?: number } };
+    | { type: 'SET_TIME', payload: number}
+    | { type: 'COMPLETE_ALL'};
 
 const initialState: TimerState = {
     timers: [],
     activeTimerIndex: null,
     queueMode: 'sequential',
+    timerStatus: TimerStatus.READY,
+    globalTimer: 0
 };
 
+// Utility function to reset an individual timer
 const resetTimer = (timer: Timer): Timer => {
-    let resetTime = 0;
-
-    // Determine the reset time based on the timer type
-    if (timer.type === 'xy') {
-        resetTime = timer.roundTime || 0; // Reset to the first round's time
-    } else if (timer.type === 'tabata') {
-        resetTime = timer.workTime || 0; // Reset to the first work interval
-    } else if (timer.type === 'countdown' || timer.type === 'stopwatch') {
-        resetTime = timer.duration || 0; // Reset to the original duration
-    }
+    // Determine reset time based on timer type
+    const resetTime = (() => {
+        switch (timer.type) {
+            case 'xy':
+                return timer.roundTime || 0; // Reset to the round time
+            case 'tabata':
+                return timer.workTime || 0; // Reset to the work interval
+            case 'countdown':
+            case 'stopwatch':
+                return timer.duration || 0; // Reset to the original duration
+            default:
+                return 0;
+        }
+    })();
 
     return {
         ...timer,
         state: 'not running', // Reset to the initial state
-        currentRound: timer.type === 'xy' || timer.type === 'tabata' ? 1 : undefined, // Reset rounds for applicable types
-        duration: resetTime, // Update duration for the timer
+        currentRound: timer.type === 'xy' || timer.type === 'tabata' ? 1 : undefined, // Reset currentRound to 1
+        duration: resetTime, // Reset the duration
     };
 };
 
+
 const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
     switch (action.type) {
-        case 'ADD_TIMER':
-            return { ...state, timers: [...state.timers, action.payload] };
+        // Add a timer
+        case 'ADD_TIMER': {
+            return { 
+                ...state, 
+                timers: [...state.timers, action.payload],
+            };
+        }
 
+        // Remove a timer
         case 'REMOVE_TIMER': {
-            const updatedTimers = state.timers.filter(timer => timer.id !== action.payload);
+            const updatedTimers = state.timers.filter((_timer, index) => index !== action.payload);
             return {
                 ...state,
                 timers: updatedTimers,
@@ -72,18 +97,23 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
             };
         }
 
-        case 'RESET_TIMERS':
-            return initialState;
+        // Called to start globalTimer
+        case 'START_TIMER': {
+            return { 
+                ...state, 
+                activeTimerIndex: action.payload, 
+                timerStatus: TimerStatus.RUNNING, 
+                globalTimer: 0 
+            };
+        }
 
-        case 'START_TIMER':
-            return { ...state, activeTimerIndex: action.payload };
+        // Used to toggle pause/resume the timer
+        case 'TOGGLE_TIMER':
+            return { ...state, timerStatus: action.payload};
 
-        case 'COMPLETE_TIMER': {
-            const nextIndex =
-                state.activeTimerIndex !== null &&
-                state.activeTimerIndex + 1 < state.timers.length
-                    ? state.activeTimerIndex + 1
-                    : null;
+        // Called whenever an individual timer completes
+        case 'COMPLETE_CURRENT_TIMER': {
+            const nextIndex = state.activeTimerIndex !== null ? state.activeTimerIndex + 1 : null;
 
             return {
                 ...state,
@@ -92,28 +122,39 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
                         ? {
                             ...timer,
                             state: 'completed',
-                            duration: 0,
-                            currentRound: timer.rounds || 1, // Mark all rounds completed
+                            currentRound: timer.type === 'xy' || timer.type === 'tabata' ? timer.rounds : undefined, // Set currentRound to max
                         }
                         : timer
                 ),
                 activeTimerIndex: nextIndex, // Move to the next timer or null if workout ends
+                globalTimer: 0, // Reset global timer
             };
         }
 
-        case 'RESET_TIMER_STATE':
+        // Resets all timers
+        case 'RESET_TIMER_STATE': {
             return {
                 ...state,
-                timers: state.timers.map(resetTimer), // Apply reset to each timer using the helper
+                timers: state.timers.map(resetTimer), // Apply reset logic to all timers
                 activeTimerIndex: null, // Reset active timer index
+                globalTimer: 0, // Reset global timer
+                timerStatus: TimerStatus.READY, // Set status to READY
             };
+        }
 
-        case 'UPDATE_TIMER_STATE': {
-            const { index, state: newState } = action.payload;
+        // called every second while the app is running to increment globalTimer
+        case 'SET_TIME': {
+            return {...state, globalTimer: action.payload}
+        }
+
+        // called once all timers are complete
+        case 'COMPLETE_ALL' : {
             return {
                 ...state,
-                timers: state.timers.map((timer, i) => (i === index ? { ...timer, state: newState } : timer)),
-            };
+                globalTimer: 0,
+                activeTimerIndex: 0,
+                timerStatus: TimerStatus.COMPLETE
+            }
         }
 
         default:

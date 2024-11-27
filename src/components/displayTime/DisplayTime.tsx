@@ -9,11 +9,19 @@ const formatTime = (seconds: number) => {
 };
 
 interface DisplayTimeProps {
-    timeInSeconds: number; // Updated to be more descriptive
+    currentTime: number; // Updated to be more descriptive
+    totalTime: number;
+    type: 'stopwatch' | 'countdown' | 'xy' | 'tabata';
 }
 
-const DisplayTime: React.FC<DisplayTimeProps> = ({ timeInSeconds }) => (
-    <div className="time-display">{formatTime(timeInSeconds)}</div>
+const DisplayTime: React.FC<DisplayTimeProps> = ({ currentTime, totalTime, type }) => (
+    <div className="time-display">
+        {formatTime(currentTime)}
+        
+        {
+            type !== 'countdown' && <> / {formatTime(totalTime)}</>
+        }
+    </div>
 );
 
 export default DisplayTime;

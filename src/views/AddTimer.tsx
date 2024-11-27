@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons'; // Import icons
 import Button from '../components/button/Button';
 import { useTimerContext } from '../context/TimerContext';
 
@@ -17,7 +18,7 @@ const AddTimer = () => {
     const [rounds, setRounds] = useState(1); // For XY and Tabata
     const [name, setName] = useState('');
     const [error, setError] = useState('');
-    const { dispatch } = useTimerContext();
+    const { state, dispatch } = useTimerContext();
     const navigate = useNavigate();
 
     const handleAddTimer = () => {
@@ -39,6 +40,10 @@ const AddTimer = () => {
         }
         setError(''); // Clear any existing errors
 
+        // Generate a default name if no name is provided
+        const nextNumber = state.timers.length + 1;
+        const defaultName = `Timer ${nextNumber}`;
+
         const newTimer = {
             id: uuidv4(),
             type: timerType,
@@ -47,13 +52,14 @@ const AddTimer = () => {
             workTime,
             restTime,
             rounds,
-            name: name.trim() || timerType,
-            state: 'not running' as 'not running',
-            addedAt: Date.now(), // Timestamp for sorting
-            currentRound: 1, // Initialize currentRound
+            name: name.trim() || defaultName,
+            state: 'not running' as const,
+            addedAt: Date.now(),
+            currentRound: 1,
         };
 
         dispatch({ type: 'ADD_TIMER', payload: newTimer });
+        dispatch({ type: 'RESET_TIMER_STATE' });
         navigate('/'); // Navigate back to the home page
     };
 
@@ -82,70 +88,143 @@ const AddTimer = () => {
 
     return (
         <div className="timers-container">
-            <h2>Add Timer</h2>
-            {error && <p className="error-message">{error}</p>}
-            <form
-                onSubmit={e => {
-                    e.preventDefault();
-                    handleAddTimer();
-                }}
-            >
-                <div className="form-group">
-                    <label htmlFor="timerType">Timer Type:</label>
-                    <select id="timerType" value={timerType} onChange={handleTimerTypeChange} className="input">
-                        <option value="stopwatch">Stopwatch</option>
-                        <option value="countdown">Countdown</option>
-                        <option value="xy">XY</option>
-                        <option value="tabata">Tabata</option>
-                    </select>
+            <div className="add-timer-page">
+                <div className="timer-wrapper">
+                    <h2>Add Timer</h2>
+                    {error && <p className="error-message">{error}</p>}
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleAddTimer();
+                        }}
+                    >
+                        <div className="form-group">
+                            <label htmlFor="timerType">Timer Type:</label>
+                            <select
+                                id="timerType"
+                                value={timerType}
+                                onChange={handleTimerTypeChange}
+                                className="input"
+                            >
+                                <option value="stopwatch">Stopwatch</option>
+                                <option value="countdown">Countdown</option>
+                                <option value="xy">XY</option>
+                                <option value="tabata">Tabata</option>
+                            </select>
+                        </div>
+                        {timerType === 'stopwatch' && (
+                            <div className="form-group">
+                                <label htmlFor="duration">Duration (seconds):</label>
+                                <input
+                                    id="duration"
+                                    type="number"
+                                    value={duration}
+                                    onChange={(e) => setDuration(Number(e.target.value))}
+                                    className="input"
+                                    min="1"
+                                />
+                            </div>
+                        )}
+                        {timerType === 'countdown' && (
+                            <div className="form-group">
+                                <label htmlFor="duration">Duration (seconds):</label>
+                                <input
+                                    id="duration"
+                                    name="duration"
+                                    type="number"
+                                    value={duration}
+                                    onChange={(e) => setDuration(Number(e.target.value))}
+                                    className="input"
+                                    min="1"
+                                />
+                            </div>
+                        )}
+                        {timerType === 'xy' && (
+                            <>
+                                <div className="form-group">
+                                    <label htmlFor="roundTime">Round Time (seconds):</label>
+                                    <input
+                                        id="roundTime"
+                                        type="number"
+                                        value={roundTime}
+                                        onChange={(e) => setRoundTime(Number(e.target.value))}
+                                        className="input"
+                                        min="1"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="rounds">Number of Rounds:</label>
+                                    <input
+                                        id="rounds"
+                                        type="number"
+                                        value={rounds}
+                                        onChange={(e) => setRounds(Number(e.target.value))}
+                                        className="input"
+                                        min="1"
+                                    />
+                                </div>
+                            </>
+                        )}
+                        {timerType === 'tabata' && (
+                            <>
+                                <div className="form-group">
+                                    <label htmlFor="workTime">Work Time (seconds):</label>
+                                    <input
+                                        id="workTime"
+                                        type="number"
+                                        value={workTime}
+                                        onChange={(e) => setWorkTime(Number(e.target.value))}
+                                        className="input"
+                                        min="1"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="restTime">Rest Time (seconds):</label>
+                                    <input
+                                        id="restTime"
+                                        type="number"
+                                        value={restTime}
+                                        onChange={(e) => setRestTime(Number(e.target.value))}
+                                        className="input"
+                                        min="1"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="rounds">Number of Rounds:</label>
+                                    <input
+                                        id="rounds"
+                                        type="number"
+                                        value={rounds}
+                                        onChange={(e) => setRounds(Number(e.target.value))}
+                                        className="input"
+                                        min="1"
+                                    />
+                                </div>
+                            </>
+                        )}
+                        <div className="form-group">
+                            <label htmlFor="name">Name (optional):</label>
+                            <input
+                                id="name"
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="input"
+                                placeholder="e.g., Warm-Up"
+                            />
+                        </div>
+                        <div className="form-buttons">
+                            <Button htmlType="submit" label="Add Timer" icon={faPlus}/>
+                            <Button
+                                type="secondary"
+                                label="Cancel"
+                                icon={faTimes}
+                                onClick={() => navigate('/')}
+                            />
+                        </div>
+                    </form>
                 </div>
-                {timerType === 'stopwatch' && (
-                    <div className="form-group">
-                        <label htmlFor="duration">Duration (seconds):</label>
-                        <input id="duration" type="number" value={duration} onChange={e => setDuration(Number(e.target.value))} className="input" min="1" />
-                    </div>
-                )}
-                {timerType === 'countdown' && (
-                    <div className="form-group">
-                        <label htmlFor="duration">Duration (seconds):</label>
-                        <input id="duration" type="number" value={duration} onChange={e => setDuration(Number(e.target.value))} className="input" min="1" />
-                    </div>
-                )}
-                {timerType === 'xy' && (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="roundTime">Round Time (seconds):</label>
-                            <input id="roundTime" type="number" value={roundTime} onChange={e => setRoundTime(Number(e.target.value))} className="input" min="1" />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="rounds">Number of Rounds:</label>
-                            <input id="rounds" type="number" value={rounds} onChange={e => setRounds(Number(e.target.value))} className="input" min="1" />
-                        </div>
-                    </>
-                )}
-                {timerType === 'tabata' && (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="workTime">Work Time (seconds):</label>
-                            <input id="workTime" type="number" value={workTime} onChange={e => setWorkTime(Number(e.target.value))} className="input" min="1" />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="restTime">Rest Time (seconds):</label>
-                            <input id="restTime" type="number" value={restTime} onChange={e => setRestTime(Number(e.target.value))} className="input" min="1" />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="rounds">Number of Rounds:</label>
-                            <input id="rounds" type="number" value={rounds} onChange={e => setRounds(Number(e.target.value))} className="input" min="1" />
-                        </div>
-                    </>
-                )}
-                <div className="form-group">
-                    <label htmlFor="name">Name (optional):</label>
-                    <input id="name" type="text" value={name} onChange={e => setName(e.target.value)} className="input" placeholder="e.g., Warm-Up" />
-                </div>
-                <Button htmlType="submit" label="Add Timer" />
-                <Button type="secondary" label="Cancel" onClick={() => navigate('/')} />
-            </form>
+            </div>
         </div>
     );
 };

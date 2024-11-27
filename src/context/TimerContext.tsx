@@ -1,6 +1,6 @@
 //TimerContext.tsx
 
-import React, { createContext, useReducer, useContext } from 'react';
+import { createContext, useReducer, useContext } from 'react';
 import type { TimerType } from '../views/AddTimer';
 
 export type Timer = {
@@ -36,6 +36,26 @@ const initialState: TimerState = {
     timers: [],
     activeTimerIndex: null,
     queueMode: 'sequential',
+};
+
+const resetTimer = (timer: Timer): Timer => {
+    let resetTime = 0;
+
+    // Determine the reset time based on the timer type
+    if (timer.type === 'xy') {
+        resetTime = timer.roundTime || 0; // Reset to the first round's time
+    } else if (timer.type === 'tabata') {
+        resetTime = timer.workTime || 0; // Reset to the first work interval
+    } else if (timer.type === 'countdown' || timer.type === 'stopwatch') {
+        resetTime = timer.duration || 0; // Reset to the original duration
+    }
+
+    return {
+        ...timer,
+        state: 'not running', // Reset to the initial state
+        currentRound: timer.type === 'xy' || timer.type === 'tabata' ? 1 : undefined, // Reset rounds for applicable types
+        duration: resetTime, // Update duration for the timer
+    };
 };
 
 const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
@@ -84,24 +104,7 @@ const timerReducer = (state: TimerState, action: TimerAction): TimerState => {
         case 'RESET_TIMER_STATE':
             return {
                 ...state,
-                timers: state.timers.map(timer => {
-                    let resetTime = 0;
-
-                    if (timer.type === 'xy') {
-                        resetTime = timer.roundTime || 0; // Reset to the first round's time
-                    } else if (timer.type === 'tabata') {
-                        resetTime = timer.workTime || 0; // Reset to the first work interval
-                    } else if (timer.type === 'countdown') {
-                        resetTime = timer.duration || 0; // Reset to the original countdown duration
-                    }
-
-                    return {
-                        ...timer,
-                        state: 'not running', // Reset timer state
-                        currentRound: timer.type === 'xy' || timer.type === 'tabata' ? 1 : undefined, // Reset rounds for applicable timers
-                        duration: timer.type === 'stopwatch' || timer.type === 'countdown' ? resetTime : timer.duration, // Reset only for stopwatch and countdown
-                    };
-                }),
+                timers: state.timers.map(resetTimer), // Apply reset to each timer using the helper
                 activeTimerIndex: null, // Reset active timer index
             };
 

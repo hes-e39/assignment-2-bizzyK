@@ -138,27 +138,18 @@ const useTimer = ({ type, workTime = 20, restTime = 10, roundTime = 60, rounds =
         }, [dispatch, type, duration]),
         fastForward: useCallback(() => {
             if (activeTimerIndex !== null) {
-                if (type === 'xy') {
-                    // Complete all remaining rounds
+                if (type === 'xy' || type === 'tabata') {
                     setCurrentRound(rounds); // Set to last round
-                    setTime(0); // Set time to 0 for the last round
-                } else if (type === 'tabata') {
-                    // Complete all remaining intervals
-                    setCurrentRound(rounds); // Set to last round
-                    setIsWorkInterval(false); // Set to last rest interval
-                    setTime(0); // Set time to 0 for the last interval
+                    setIsWorkInterval(false); // Set to the last interval for tabata
+                    setTime(0); // End the timer
                 } else {
-                    // For stopwatch and countdown, just set time to 0
-                    setTime(0);
+                    setTime(0); // End for countdown and stopwatch
                 }
-
-                setIsActive(false); // Stop the current timer
-                dispatch({ type: 'UPDATE_TIMER_STATE', payload: { index: activeTimerIndex, state: 'completed' } }); // Mark as completed
-                setTimeout(() => {
-                    dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex }); // Transition to next timer
-                }, 0);
+                setIsActive(false);
+                dispatch({ type: 'UPDATE_TIMER_STATE', payload: { index: activeTimerIndex, state: 'completed' } });
+                dispatch({ type: 'COMPLETE_TIMER', payload: activeTimerIndex });
             }
-        }, [type, rounds, dispatch, activeTimerIndex]),
+        }, [dispatch, activeTimerIndex, type, rounds]),
     };
 };
 

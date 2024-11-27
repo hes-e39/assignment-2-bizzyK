@@ -97,8 +97,8 @@ const TimersView = () => {
 
     const handleResetWorkout = () => {
         dispatch({ type: 'RESET_TIMER_STATE' });
-        setRemainingWorkoutTime(totalWorkoutTime); // Reset Remaining Time
-        setIsWorkoutComplete(false); // Ensure the congratulations message does not show
+        setRemainingWorkoutTime(totalWorkoutTime); // Reset remaining time
+        setIsWorkoutComplete(false); // Ensure congrats message doesn't show
     };
 
     const handleFastForwardWorkout = () => {

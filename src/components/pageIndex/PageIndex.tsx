@@ -8,22 +8,24 @@ import ThemeToggle from '../themeToggle/ThemeToggle';
 const PageIndex: React.FC = () => {
     const location = useLocation();
 
+    // Normalize the pathname to match defined routes
+    const normalizedPath = location.pathname.split('?')[0]; // Remove query params
     const titles: Record<string, string> = {
         '/': 'Timers',
         '/docs': 'Documentation',
         '/add': 'Add Timer',
     };
 
-    const pageTitle = titles[location.pathname] || 'Assignment 2 - Elizabeth Koch';
+    const pageTitle = titles[normalizedPath] || 'Assignment 2 - Elizabeth Koch';
 
     // Update document title dynamically
     useEffect(() => {
         document.title = pageTitle;
     }, [pageTitle]);
 
-    // Log unexpected paths (optional for debugging)
-    if (!titles[location.pathname]) {
-        console.warn(`Unexpected pathname: ${location.pathname}`);
+    // Debugging for unexpected paths
+    if (!titles[normalizedPath]) {
+        console.warn(`Unexpected pathname: ${normalizedPath}`);
     }
 
     return (

@@ -1,17 +1,17 @@
 // DocumentationView.tsx
 
 import { faSun } from '@fortawesome/free-solid-svg-icons';
-import ThemeToggle from '../components/themeToggle/ThemeToggle';
 import Button from '../components/button/Button';
 import DisplayRounds from '../components/displayRounds/DisplayRounds';
 import DisplayTime from '../components/displayTime/DisplayTime';
 import DocumentComponent from '../components/documentation/DocumentComponent';
+import ThemeToggle from '../components/themeToggle/ThemeToggle';
 import Timer from '../components/timers/Timer';
 import { TimerStatus } from '../context/TimerContext';
 
 const DocumentationView = () => {
     return (
-        <div className="documentation-container">
+        <div className="timers-container">
             {/* Timer Documentation */}
             <DocumentComponent
                 title="Timer"
